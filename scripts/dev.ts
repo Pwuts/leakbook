@@ -1,5 +1,5 @@
 const devFrontend = Deno.run({
-  cmd: ["npm", "run", "dev"],
+  cmd: ['yarn', 'run', 'dev'],
   cwd: './frontend/',
 });
 
