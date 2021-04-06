@@ -16,12 +16,22 @@ const frontendServerUrl =
   : undefined;
 if (frontendServerUrl) console.log(`Proxying to frontend at ${frontendServerUrl}`);
 
+const decoder = new TextDecoder();
+
 for await (const request of server) (async (req: ServerRequest) => {
   const respond = makeResponder(req, Date.now());
 
   try {
-    const url = new URL(req.url, `http://${req.headers.get('host')}`);
-    const endpoint = endpoints.find(rh => rh.urlMatcher(url));
+    const url = new URL(
+      req.url,
+      `http://${req.headers.get('host')}`
+    );
+    const endpoint = endpoints.find(rh =>
+      (
+        typeof rh.method == 'string' && rh.method == req.method ||
+        rh.method.includes(req.method)
+      ) && rh.urlMatcher(url)
+    );
 
     if (
       endpoint &&
@@ -51,7 +61,14 @@ for await (const request of server) (async (req: ServerRequest) => {
       });
     }
     else {
-      await endpoint.handler(respond, url, req);
+      let body: object | undefined = undefined;
+
+      if (req.headers.get('content-type')?.split(';')[0] == 'application/json') {
+        const bodyText = decoder.decode(await Deno.readAll(req.body));
+        body = JSON.parse(bodyText);
+      }
+
+      await endpoint.handler(respond, url, body, req);
     }
   }
   catch (error) {
