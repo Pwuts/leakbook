@@ -19,7 +19,7 @@ export default async function serveStatic(
     return false;
   }
 
-  await respond(await serveFile(req, path instanceof URL ? path.pathname : path));
+  await req.respond(await serveFile(req, path instanceof URL ? path.pathname : path));
 
   return true;
 }
