@@ -1,8 +1,52 @@
-import { serve, ServerRequest } from 'https://deno.land/std@0.92.0/http/server.ts';
+import {
+  serve,
+  serveTLS,
+  listenAndServe,
+  Server,
+  ServerRequest
+} from 'https://deno.land/std@0.92.0/http/server.ts';
 
-const port = Number(Deno.env.get('PORT')) || 8080;
-const server = serve({ port });
-console.log(`Starting server on port ${port}`);
+const isProduction = Deno.env.get('ENV_TYPE') == 'production';
+const hostname = isProduction ? 'facebooklekcheck.nl' : undefined;
+
+let tls = false;
+let server: Server | null = null;
+
+if (isProduction)
+try {
+  console.log(`Starting HTTPS server on port 443`);
+  server = serveTLS({
+    hostname,
+    port: 443,
+    certFile: './certs/cert.pem',
+    keyFile: './certs/privkey.pem',
+  });
+  tls = true;
+}
+catch (error) {
+  console.log('No TLS possible, fallback to HTTP');
+}
+
+if (tls) {
+  console.log('Redirecting all HTTP traffic to HTTPS');
+  listenAndServe({ hostname, port: 80 }, async req => {
+    req.respond({
+      status: 301,
+      headers: new Headers({
+        Location: `https://${hostname}${req.url}`,
+      })
+    })
+  });
+}
+else {
+  const port = Number(Deno.env.get('PORT')) || 8080;
+  console.log(`Starting HTTP server on port ${port}`);
+  server = serve({ port });
+}
+
+if (server == null) {
+  throw new Error('Could not create server');
+}
 
 import { rateLimitRequest } from './modules/rate-limiter.ts';
 import { makeResponder } from './util.ts';
@@ -11,16 +55,24 @@ import serveStatic from "./modules/serve-static.ts";
 import endpoints from './endpoints.ts';
 
 const frontendServerUrl =
-  Deno.env.get('ENV_TYPE') != 'production'
+  !isProduction
   ? Deno.env.get('FRONTEND_URL') || 'http://localhost:3000'
   : undefined;
+
 if (frontendServerUrl) console.log(`Proxying to frontend at ${frontendServerUrl}`);
 
-for await (const request of server) (async (req: ServerRequest) => {
+
+for await (const req of server) handleRequest(req);
+
+async function handleRequest(req: ServerRequest): Promise<void>
+{
   const respond = makeResponder(req, Date.now());
 
   try {
-    const url = new URL(req.url, `http://${req.headers.get('host')}`);
+    const url = new URL(
+      req.url,
+      `http${!tls ? 's' : ''}://${req.headers.get('host')}`
+    );
     const endpoint = endpoints.find(rh => rh.urlMatcher(url));
 
     if (
@@ -61,4 +113,4 @@ for await (const request of server) (async (req: ServerRequest) => {
       body: 'Unhandled server error :(',
     });
   }
-})(request);
+}
