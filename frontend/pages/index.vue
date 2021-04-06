@@ -1,38 +1,36 @@
 <template>
-  <div class="container"
-    :class="{ warning: pwned == true, success: pwned == false }"
-  >
-    <h1 class="title small-title">Is je telefoonnummer gelekt door Facebook?</h1>
+<main
+  :class="{ warning: pwned == true, success: pwned == false }"
+>
+  <h1 class="title">Is je telefoonnummer gelekt door Facebook?</h1>
 
-    <div>
-      <div class="row">
-        <input type="text"
-          v-model="phoneNumber"
-          placeholder="06 . . . . . . . ."
-          @keyup.enter="checkPhoneNumber()"
-          tabindex="1"
-        />
+  <div class="form">
+    <div class="row">
+      <input type="text"
+        v-model="phoneNumber"
+        placeholder="06 . . . . . . . ."
+        @keyup.enter="checkPhoneNumber()"
+        tabindex="1"
+      />
 
-        <button @click="checkPhoneNumber()">check</button>
-      </div>
-
-      <div class="row">
-        <input type="text"
-          v-model="name"
-          placeholder="optioneel: je naam"
-          @keyup.enter="checkPhoneNumber()"
-          tabindex="2"
-        />
-      </div>
+      <button @click="checkPhoneNumber()">check</button>
     </div>
 
-    <h1 class="title">{{ title }}</h1>
-
-    <h2 class="subtitle" v-if="pwned != null">{{ subtitle }}</h2>
-    <div v-else class="spacer"></div>
-
-    <span>Alle code van deze checker staat op <a href="https://github.com/Pwuts/leakbook">GitHub</a></span>
+    <div class="row">
+      <input type="text"
+        v-model="name"
+        placeholder="optioneel: je naam"
+        @keyup.enter="checkPhoneNumber()"
+        tabindex="2"
+      />
+    </div>
   </div>
+
+  <h1 class="big-message">{{ bigMessage }}</h1>
+
+  <h2 class="message" v-if="pwned != null">{{ message }}</h2>
+  <div v-else class="spacer"></div>
+</main>
 </template>
 
 <script lang="ts">
@@ -44,12 +42,12 @@ export default class Index extends Vue {
   phoneNumber = '';
   name = '';
 
-  get title(): string
+  get bigMessage(): string
   {
     if (this.pwned == null) return '???';
-    return this.pwned && this.nameMatches == null || this.nameMatches ? 'Jep.' : 'Nee.';
+    return this.pwned && this.nameMatches == null || this.nameMatches ? 'Jep, helaas.' : 'Nee.';
   }
-  get subtitle(): string | null
+  get message(): string | null
   {
     if (this.pwned == null) return null;
 
@@ -131,41 +129,44 @@ export default class Index extends Vue {
 </script>
 
 <style>
-.container {
-  margin: 0 auto;
-  padding: 0.5em;
-  min-height: 100vh;
+main {
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
   align-items: center;
-  text-align: center;
+  justify-content: space-around;
+}
+main > * {
+  max-width: 100%;
 }
 
-.container.success {
+main.success {
   background-color: #5B5;
 }
-.container.warning {
+main.warning {
   background-color: #F55;
 }
 
-.container .row {
+.form {
+  margin: 1.5em 0;
+}
+
+.form .row {
   display: flex;
   justify-content: stretch;
   width: 30em;
   max-width: 100%;
-  white-space: nowrap;
+  min-width: 16em;
 }
-.container .row > * {
+.form .row > * {
   vertical-align: middle;
 }
 .row:not(:last-child) {
-  margin-bottom: 2.5em;
+  margin-bottom: 2.5rem;
 }
 
 button,
 input[type="text"] {
-  font-size: 2rem;
+  font-size: 1.5rem;
   border: none;
   outline: none;
   height: 2em;
@@ -180,39 +181,33 @@ input[type="text"] {
   padding: 0.1em 0.5em 0;
   border-bottom: 3px dashed #555;
   flex: auto;
+  min-width: 0;
 }
 
-.title {
+.title,
+.big-message,
+.message {
   font-family:
-    'Quicksand',
-    'Source Sans Pro',
-    -apple-system,
-    BlinkMacSystemFont,
     'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
     sans-serif;
   display: block;
-  font-weight: 300;
-  font-size: 72px;
-  color: #424242;
+  color: #232323;
   letter-spacing: 1px;
 }
-.small-title {
-  font-size: 42px;
+.title {
+  font-size: 36px;
   font-weight: 400;
 }
 
-.subtitle {
+.big-message {
   font-weight: 300;
-  font-size: 40px;
-  color: #494949;
+  font-size: 64px;
+  margin-bottom: 1rem;
+}
+.message {
+  font-weight: 400;
+  font-size: 32px;
   word-spacing: 5px;
   padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
 }
 </style>
