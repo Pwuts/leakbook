@@ -16,7 +16,6 @@ if (isProduction)
 try {
   console.log(`Starting HTTPS server on port 443`);
   server = serveTLS({
-    hostname,
     port: 443,
     certFile: './certs/cert.pem',
     keyFile: './certs/privkey.pem',
@@ -29,7 +28,7 @@ catch (error) {
 
 if (tls) {
   console.log('Redirecting all HTTP traffic to HTTPS');
-  listenAndServe({ hostname, port: 80 }, req => {
+  listenAndServe({ port: 80 }, req => {
     req.respond({
       status: 302,
       headers: new Headers({
