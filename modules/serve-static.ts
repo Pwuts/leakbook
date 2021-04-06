@@ -1,36 +1,25 @@
+import { ServerRequest } from "https://deno.land/std@0.92.0/http/server.ts";
 import { IResponse } from "../util.ts";
-import mime from "https://ga.jspm.io/npm:mime@2.0.3/types/standard.json.js";
+import { serveFile } from "https://deno.land/std@0.92.0/http/file_server.ts"
 
-export default async function serveStatic(path: string | URL, respond: (res: IResponse) => Promise<void>): Promise<boolean>
+export default async function serveStatic(
+  path: string | URL,
+  req: ServerRequest,
+  respond: (res: IResponse) => Promise<void>
+): Promise<boolean>
 {
-  let fileContent: Uint8Array;
-
   try {
     let fileEntry = Deno.statSync(path);
 
     if (fileEntry.isDirectory) {
       path = getIndexForDirectory(path);
     }
-
-    fileContent = Deno.readFileSync(path);
   }
   catch (error) {
     return false;
   }
 
-  let fileExt = (path instanceof URL ? path.pathname : path).split('.').pop() as string;
-
-  const mimeType =
-    Object.entries(mime as {[mimeType: string]: string[]})
-    .find(([_mimeType, exts]) => exts.includes(fileExt))?.[0];
-
-  await respond({
-    status: 200,
-    body: fileContent,
-    headers: new Headers({
-      'Content-Type': mimeType ?? 'application/octet-stream',
-    }),
-  });
+  await respond(await serveFile(req, path instanceof URL ? path.pathname : path));
 
   return true;
 }

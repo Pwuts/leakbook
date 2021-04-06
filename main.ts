@@ -102,7 +102,7 @@ async function handleRequest(req: ServerRequest): Promise<void>
           console.warn('frontend server not available');
         }
       }
-      if (req.url && await serveStatic(`./frontend/dist${req.url}`, respond)) return;
+      if (req.url && await serveStatic(`./frontend/dist${req.url}`, req, respond)) return;
 
       respond({
         status: 404,
