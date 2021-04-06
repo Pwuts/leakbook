@@ -11,7 +11,7 @@ export function formatNumber(n: number): string
 
 export function makeResponder(req: ServerRequest, tStart: number)
 {
-  return function respond(res: IResponse) {
+  return async function respond(res: IResponse) {
     if (!res.headers) res.headers = new Headers();
     res.headers.set('Access-Control-Allow-Origin', '*');
 
@@ -26,7 +26,7 @@ export function makeResponder(req: ServerRequest, tStart: number)
       }
     }
 
-    req.respond({
+    await req.respond({
       ...res,
       body,
     });

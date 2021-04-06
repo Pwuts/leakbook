@@ -1,7 +1,7 @@
 import { IResponse } from "../util.ts";
 import mime from "https://ga.jspm.io/npm:mime@2.0.3/types/standard.json.js";
 
-export default function serveStatic(path: string | URL, respond: (res: IResponse) => void): boolean
+export default async function serveStatic(path: string | URL, respond: (res: IResponse) => Promise<void>): Promise<boolean>
 {
   let fileContent: Uint8Array;
 
@@ -24,7 +24,7 @@ export default function serveStatic(path: string | URL, respond: (res: IResponse
     Object.entries(mime as {[mimeType: string]: string[]})
     .find(([_mimeType, exts]) => exts.includes(fileExt))?.[0];
 
-  respond({
+  await respond({
     status: 200,
     body: fileContent,
     headers: new Headers({

@@ -15,7 +15,7 @@ export async function proxyRequest(req: ServerRequest, targetUrl: string): Promi
     return pipeEventStream(proxiedRes, req);
   }
 
-  req.respond({
+  await req.respond({
     body: await proxiedRes.text(),
     status: proxiedRes.status,
     headers: proxiedRes.headers,

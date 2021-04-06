@@ -4,13 +4,13 @@ import { nameMatchesPhoneNumber, numberIsLeaked } from "./datasets/index.ts";
 
 const endpoints: Array<{
   urlMatcher: (url: URL) => boolean,
-  handler(respond: (res: IResponse) => void, url: URL, request: ServerRequest): Promise<void>,
+  handler(respond: (res: IResponse) => Promise<void>, url: URL, request: ServerRequest): Promise<void>,
 }> = [
   {
     urlMatcher: url => url.pathname == '/check',
     handler: async (respond, url) => {
       if (!url.searchParams.has('phoneNumber') || !url.searchParams.get('phoneNumber')) {
-        respond({
+        await respond({
           status: 400,
           body: 'missing parameter \'phoneNumber\'',
         });
@@ -20,7 +20,7 @@ const endpoints: Array<{
       let phoneNumber = (url.searchParams.get('phoneNumber') as string).replace(/\s/g, '');
 
       if (!/^((\+|00)?31|0)\d{9}$/.test(phoneNumber)) {
-        respond({
+        await respond({
           status: 400,
           body: 'invalid phone number',
         });
@@ -37,7 +37,7 @@ const endpoints: Array<{
       const numberIsPwned = numberIsLeaked(phoneNumber);
       const nameMatches = name && numberIsPwned ? nameMatchesPhoneNumber(phoneNumber, name) : null;
 
-      respond({
+      await respond({
         body: JSON.stringify({
           numberIsPwned,
           nameMatches

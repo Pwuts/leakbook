@@ -29,9 +29,9 @@ catch (error) {
 
 if (tls) {
   console.log('Redirecting all HTTP traffic to HTTPS');
-  listenAndServe({ hostname, port: 80 }, async req => {
+  listenAndServe({ hostname, port: 80 }, req => {
     req.respond({
-      status: 301,
+      status: 302,
       headers: new Headers({
         Location: `https://${hostname}${req.url}`,
       })
@@ -96,7 +96,7 @@ async function handleRequest(req: ServerRequest): Promise<void>
           console.warn('frontend server not available');
         }
       }
-      if (req.url && serveStatic(`./frontend/dist${req.url}`, respond)) return;
+      if (req.url && await serveStatic(`./frontend/dist${req.url}`, respond)) return;
 
       respond({
         status: 404,
