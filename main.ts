@@ -17,7 +17,7 @@ try {
   console.log(`Starting HTTPS server on port 443`);
   server = serveTLS({
     port: 443,
-    certFile: './certs/cert.pem',
+    certFile: './certs/fullchain.pem',
     keyFile: './certs/privkey.pem',
   });
   tls = true;
