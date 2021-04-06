@@ -17,7 +17,7 @@ const endpoints: Array<{
         return;
       }
       const name = url.searchParams.get('name');
-      let phoneNumber = (url.searchParams.get('phoneNumber') as string).replace(/\s/, '');
+      let phoneNumber = (url.searchParams.get('phoneNumber') as string).replace(/\s/g, '');
 
       if (!/^((\+|00)?31|0)\d{9}$/.test(phoneNumber)) {
         respond({
@@ -35,7 +35,7 @@ const endpoints: Array<{
       }
 
       const numberIsPwned = numberIsLeaked(phoneNumber);
-      const nameMatches = name ? nameMatchesPhoneNumber(phoneNumber, name) : null;
+      const nameMatches = name && numberIsPwned ? nameMatchesPhoneNumber(phoneNumber, name) : null;
 
       respond({
         body: JSON.stringify({

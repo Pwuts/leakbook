@@ -69,8 +69,8 @@ export default class Index extends Vue {
 
   get sanitizedPhoneNumber()
   {
-    let pn = this.phoneNumber.replace(/\s/, '');
-    if (!/^((\+|00)?31|0)?\d{9}$/.test(pn)) return null;
+    let pn = this.phoneNumber.replace(/\s/g, '');
+    if (!/^((\+|00)?31|0)\d{9}$/.test(pn)) return null;
 
     if (pn.substr(0, 4) == '+316') {
       return pn.slice(1);
