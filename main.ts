@@ -1,18 +1,20 @@
 import { serve, ServerRequest } from 'https://deno.land/std@0.92.0/http/server.ts';
+
+const port = Number(Deno.env.get('PORT')) || 8080;
+const server = serve({ port });
+console.log(`Starting server on port ${port}`);
+
 import { rateLimitRequest } from './modules/rate-limiter.ts';
 import { makeResponder } from './util.ts';
 import { proxyRequest } from "./modules/proxy.ts";
 import serveStatic from "./modules/serve-static.ts";
 import endpoints from './endpoints.ts';
 
-const port = Number(Deno.env.get('PORT')) || 8080;
-
-const server = serve({ port });
-
 const frontendServerUrl =
   Deno.env.get('ENV_TYPE') != 'production'
   ? Deno.env.get('FRONTEND_URL') || 'http://localhost:3000'
   : undefined;
+if (frontendServerUrl) console.log(`Proxying to frontend at ${frontendServerUrl}`);
 
 for await (const request of server) (async (req: ServerRequest) => {
   const respond = makeResponder(req, Date.now());
