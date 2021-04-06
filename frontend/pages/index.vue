@@ -92,13 +92,11 @@ export default class Index extends Vue {
       return;
     }
 
-    this.$axios.get<{ numberIsPwned: boolean, nameMatches: boolean | null }>(
+    this.$axios.post<{ numberIsPwned: boolean, nameMatches: boolean | null }>(
       '/check',
       {
-        params: {
-          phoneNumber: this.sanitizedPhoneNumber,
-          name: this.name.trim() || null,
-        }
+        phoneNumber: this.sanitizedPhoneNumber,
+        name: this.name.trim() || null,
       }
     )
     .then(res => {

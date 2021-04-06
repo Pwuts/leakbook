@@ -61,6 +61,8 @@ const frontendServerUrl =
 if (frontendServerUrl) console.log(`Proxying to frontend at ${frontendServerUrl}`);
 
 
+const decoder = new TextDecoder();
+
 for await (const req of server) handleRequest(req);
 
 async function handleRequest(req: ServerRequest): Promise<void>
@@ -70,9 +72,14 @@ async function handleRequest(req: ServerRequest): Promise<void>
   try {
     const url = new URL(
       req.url,
-      `http${!tls ? 's' : ''}://${req.headers.get('host')}`
+      `http${tls ? 's' : ''}://${req.headers.get('host')}`
     );
-    const endpoint = endpoints.find(rh => rh.urlMatcher(url));
+    const endpoint = endpoints.find(rh =>
+      (
+        typeof rh.method == 'string' && rh.method == req.method ||
+        rh.method.includes(req.method)
+      ) && rh.urlMatcher(url)
+    );
 
     if (
       endpoint &&
@@ -102,7 +109,14 @@ async function handleRequest(req: ServerRequest): Promise<void>
       });
     }
     else {
-      await endpoint.handler(respond, url, req);
+      let body: object | undefined = undefined;
+
+      if (req.headers.get('content-type')?.split(';')[0] == 'application/json') {
+        const bodyText = decoder.decode(await Deno.readAll(req.body));
+        body = JSON.parse(bodyText);
+      }
+
+      await endpoint.handler(respond, url, body, req);
     }
   }
   catch (error) {
