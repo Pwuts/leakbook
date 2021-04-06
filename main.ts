@@ -5,7 +5,9 @@ import { proxyRequest } from "./modules/proxy.ts";
 import serveStatic from "./modules/serve-static.ts";
 import endpoints from './endpoints.ts';
 
-const server = serve({ port: 8080 });
+const port = Number(Deno.env.get('PORT')) || 8080;
+
+const server = serve({ port });
 
 const frontendServerUrl =
   Deno.env.get('ENV_TYPE') != 'production'
