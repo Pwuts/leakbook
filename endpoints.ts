@@ -24,6 +24,7 @@ const endpoints: Array<{
           status: 400,
           body: 'invalid phone number',
         });
+        return;
       }
 
       if (phoneNumber.substr(0, 4) == '+316') {
