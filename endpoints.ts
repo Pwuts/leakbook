@@ -1,6 +1,6 @@
 import { IResponse } from "./util.ts";
 import { ServerRequest } from "https://deno.land/std@0.92.0/http/server.ts";
-import { nameMatchesPhoneNumber, numberIsLeaked, ready as datasetsReady } from "./datasets/index.ts";
+import { nameMatchesPhoneNumber, numberIsLeaked, doneLoading } from "./datasets/index.ts";
 
 const endpoints: Array<{
   urlMatcher: (url: URL) => boolean,
@@ -27,14 +27,20 @@ const endpoints: Array<{
         return;
       }
 
+      if (!doneLoading()) {
+        respond({
+          status: 503,
+          body: 'aan het opstarten, probeer het over een halve minuut nog eens',
+        });
+        return;
+      }
+
       if (phoneNumber.substr(0, 4) == '+316') {
         phoneNumber = phoneNumber.slice(1);
       }
       else if (phoneNumber.substr(0,2) == '06') {
         phoneNumber = '31' + phoneNumber.slice(1);
       }
-
-      await datasetsReady;
 
       const numberIsPwned = numberIsLeaked(phoneNumber);
       const nameMatches = name && numberIsPwned ? nameMatchesPhoneNumber(phoneNumber, name) : null;

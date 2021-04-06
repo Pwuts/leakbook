@@ -26,34 +26,33 @@ export function nameMatchesPhoneNumber(phoneNumber: string, name: string)
   })
 }
 
-export const ready = new Promise<void>(async resolve => {
-  for (const datasetDefFile of Deno.readDirSync('./datasets/defs')) {
+let loaded = false;
+export const loading = new Promise<void>(async resolve => {
+  for await (const datasetDefFile of Deno.readDir('./datasets/defs')) {
     const datasetDef: DataSetDef = JSON.parse(
-      Deno.readTextFileSync(`./datasets/defs/${datasetDefFile.name}`)
+      await Deno.readTextFile(`./datasets/defs/${datasetDefFile.name}`)
     );
 
     console.debug(`loading dataset "${datasetDef.name}" with ${datasetDef.files.length} files`);
-    
+    console.time(' in');
+
     const entries: { [phoneNumber: string]: DataSetEntry } = {};
     let totalCount = 0;
-    
-    datasetDef.files.forEach((filename, index) => {
+
+    await Promise.all(datasetDef.files.map(async (filename, index) => {
       let count = 0;
 
-      const fileStats = Deno.statSync(`./datasets/files/${filename}`);
+      const fileStats = await Deno.stat(`./datasets/files/${filename}`);
       if (!fileStats.isFile) {
         console.error(`file "${filename}" is not a file`);
         return;
       }
       Deno.stdout.writeSync(
-        encoder.encode(`loading file #${index + 1} "${filename}" (${formatNumber(fileStats.size)}B)`)
+        encoder.encode(`loading file #${index + 1} "${filename}" (${formatNumber(fileStats.size)}B)\n`)
       );
 
-      console.time(' in');
-      const fileContent = Deno.readTextFileSync(`./datasets/files/${filename}`);
-      console.timeEnd(' in');
+      const fileContent = await Deno.readTextFile(`./datasets/files/${filename}`);
 
-      console.time(' in');
       for (let line of fileContent.split('\n')) {
         if (line.length < 11) continue;
 
@@ -90,28 +89,39 @@ export const ready = new Promise<void>(async resolve => {
           // email
         };
 
-        if (++count % 10000 == 0) {
+        if (++totalCount % 10000 == 0) {
           Deno.stdout.writeSync(
-            encoder.encode(`\r${formatNumber(count)} entries processed`)
+            encoder.encode(`\r${formatNumber(totalCount)} entries processed`)
           );
         }
       }
-      console.timeEnd(' in');
+      
       totalCount += count;
-    });
+      return count;
+    }));
 
-    console.debug(`loading dataset "${datasetDef.name}" finished:`, totalCount, 'entries loaded');
+    Deno.stdout.writeSync(
+      encoder.encode(`loading dataset "${datasetDef.name}" finished: ${totalCount} entries loaded`)
+    );
+    console.timeEnd(' in');
 
     dataSets.push({
       name: datasetDef.name,
       description: datasetDef.description,
       date: new Date(datasetDef.date),
       entries,
+      length: totalCount,
     });
   }
 
+  loaded = true;
   resolve();
 });
+
+export function doneLoading(): boolean
+{
+  return loaded;
+}
 
 /* Types */
 
@@ -127,6 +137,7 @@ type DataSet = {
   description: string;
   date: Date;
   entries: { [phoneNumber: string]: DataSetEntry };
+  length: number;
 }
 
 type DataSetEntry = {
