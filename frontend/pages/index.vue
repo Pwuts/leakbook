@@ -30,6 +30,8 @@
 
     <h2 class="subtitle" v-if="pwned != null">{{ subtitle }}</h2>
     <div v-else class="spacer"></div>
+
+    <span>Alle code van deze checker staat op <a href="https://github.com/Pwuts/leakbook">GitHub</a></span>
   </div>
 </template>
 
@@ -104,7 +106,6 @@ export default class Index extends Vue {
     .then(res => {
       this.pwned = res.data.numberIsPwned;
       this.nameMatches = res.data.nameMatches;
-      console.debug('res.req', res.request);
     })
     .catch(error => {
       if (!error.response) {
