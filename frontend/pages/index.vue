@@ -97,7 +97,7 @@ export default class Index extends Vue {
       {
         params: {
           phoneNumber: this.sanitizedPhoneNumber,
-          name: this.name || null,
+          name: this.name.trim() || null,
         }
       }
     )

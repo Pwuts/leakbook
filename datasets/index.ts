@@ -16,9 +16,13 @@ export function nameMatchesPhoneNumber(phoneNumber: string, name: string)
 
     const entry = ds.entries[phoneNumber];
     return (
-      entry.firstName == name ||
-      entry.lastName == name ||
-      `${entry.firstName} ${entry.lastName}` == name
+      entry.firstName?.toLowerCase() == name.toLowerCase() ||
+      entry.lastName?.toLowerCase() == name.toLowerCase() ||
+      (
+        entry.firstName &&
+        entry.lastName &&
+        `${entry.firstName} ${entry.lastName}`.toLowerCase() == name.toLowerCase()
+      )
     )
   })
 }

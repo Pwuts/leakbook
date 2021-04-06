@@ -16,7 +16,7 @@ const endpoints: Array<{
         });
         return;
       }
-      const name = url.searchParams.get('name');
+      const name = url.searchParams.get('name')?.trim();
       let phoneNumber = (url.searchParams.get('phoneNumber') as string).replace(/\s/g, '');
 
       if (!/^((\+|00)?31|0)\d{9}$/.test(phoneNumber)) {
