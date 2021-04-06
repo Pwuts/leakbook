@@ -19,17 +19,18 @@ if (frontendServerUrl) console.log(`Proxying to frontend at ${frontendServerUrl}
 for await (const request of server) (async (req: ServerRequest) => {
   const respond = makeResponder(req, Date.now());
 
-  if (
-    'hostname' in req.conn.remoteAddr &&
-    rateLimitRequest(req.conn.remoteAddr.hostname)
-  ) {
-    respond({ status: 429 });
-    return;
-  }
-
   try {
     const url = new URL(req.url, `http://${req.headers.get('host')}`);
     const endpoint = endpoints.find(rh => rh.urlMatcher(url));
+
+    if (
+      endpoint &&
+      'hostname' in req.conn.remoteAddr &&
+      rateLimitRequest(req.conn.remoteAddr.hostname)
+    ) {
+      respond({ status: 429 });
+      return;
+    }
 
     if (!endpoint) {
       if (frontendServerUrl) {
