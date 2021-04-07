@@ -95,13 +95,13 @@ export const loading = new Promise<void>(async resolve => {
           );
         }
       }
-      
+
       totalCount += count;
       return count;
     }));
 
     Deno.stdout.writeSync(
-      encoder.encode(`loading dataset "${datasetDef.name}" finished: ${totalCount} entries loaded`)
+      encoder.encode(`\nloading dataset "${datasetDef.name}" finished: ${totalCount} entries loaded`)
     );
     console.timeEnd(' in');
 
