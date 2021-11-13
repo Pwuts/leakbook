@@ -1,9 +1,13 @@
 # Leakbook
 Online bereikbaar via:
-* `facebooklekcheck.nl`
+* [`facebooklekcheck.nl`](https://facebooklekcheck.nl)
+* [`leakbook.nl`](https://leakbook.nl)
+
+Eerder ook bereikbaar via:
 * `datispechdataweg.nl`
-* `leakbook.nl`
 * `ismijntelefoonnummergelekt.nl`
+
+Dit zijn nu doorverwijzingen naar HaveIBeenPwned.
 
 ## Idee
 Mensen de mogelijkheid geven om te checken of hun gegevens gelekt zijn in het Facebook-datalek dat vrijdag 2 april 2021 aan het licht kwam, maar het moet niet mogelijk zijn om de gegevens van iemand anders op te vragen.
